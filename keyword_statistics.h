@@ -5,45 +5,49 @@
 #include<vector>
 #include<map>
 #include<stdio.h>
+#include<stack>
 using namespace std;
 
-map <string,int> key;  //¹Ø¼ü×ÖÃ¶¾Ù±ê¼Ç 
+map <string,int> key;  //å…³é”®å­—æšä¸¾æ ‡è®° 
 
-int total_cnt=0;  //¹Ø¼ü×Ö³öÏÖÊıÁ¿¼ÇÂ¼
-int switch_cnt = 0;  //switchÍ³¼ÆÊıÁ¿
-vector <int> case_cnt;  //Ã¿×écase³öÏÖÊıÁ¿
+int total_cnt=0;  //å…³é”®å­—å‡ºç°æ•°é‡è®°å½•
+int switch_cnt = 0;  //switchç»Ÿè®¡æ•°é‡
+vector <int> case_cnt;  //æ¯ç»„caseå‡ºç°æ•°é‡
 int if_else_cnt = 0;
 int if_elseif_else_cnt = 0;
+int else_if_cnt = 0;
+int else_cnt = 0;
 
-vector <string> keyword_in_file;  //ÓÃÓÚ´æ´¢ÎÄ¼şÖĞ³öÏÖµÄËùÓĞ¹Ø¼ü×Ö 
+vector <string> keyword_in_file;  //ç”¨äºå­˜å‚¨æ–‡ä»¶ä¸­å‡ºç°çš„æ‰€æœ‰å…³é”®å­— 
+vector <string> if_and_else_in_file;  //ç”¨äºå­˜å‚¨æ–‡ä»¶ä¸­å‡ºç°çš„æ‰€æœ‰ifï¼Œelseï¼Œelse-ifä»¥åŠå¤§æ‹¬å·
 
 char file_path[100];
-int output_level;  //Íê³ÉµÈ¼¶
+int output_level;  //å®Œæˆç­‰çº§
 FILE * fp;
 
-void InitKey();  //³õÊ¼»¯¹Ø¼ü×Ö 
+void InitKey();  //åˆå§‹åŒ–å…³é”®å­— 
 
 void Input();
 
-void OpenAndReadFileToWord();  //´ò¿ªÎÄ¼ş£¬ÎÄ¼şÄÚÈİ°´×ÖÄ¸¶Á³ö²¢°ÑÊÇ¹Ø¼ü×ÖµÄ×ÖÄ¸ºÏ²¢³É¹Ø¼ü×Ö
+void OpenAndReadFileToWord();  //æ‰“å¼€æ–‡ä»¶ï¼Œæ–‡ä»¶å†…å®¹æŒ‰å­—æ¯è¯»å‡ºå¹¶æŠŠæ˜¯å…³é”®å­—çš„å­—æ¯åˆå¹¶æˆå…³é”®å­—
 
-void StatisticsLevel1();  //Í³¼Æ£ºÍê³ÉµÈ¼¶1ÒªÇó
-void OutputLevel1();  //Êä³ö£ºÍê³ÉµÈ¼¶1ÒªÇó
+void StatisticsLevel1();  //ç»Ÿè®¡ï¼šå®Œæˆç­‰çº§1è¦æ±‚
+void OutputLevel1();  //è¾“å‡ºï¼šå®Œæˆç­‰çº§1è¦æ±‚
 
 void StatisticsLevel2(); 
 void OutputLevel2();
 
-void StatisticsLevel3();
+void StatisticsLevel3And4();
+
 void OutputLevel3();
 
-void StatisticsLevel4();
 void OutputLevel4();
 
-void KeywordStatistics();  //¹Ø¼ü×ÖÍ³¼Æº¯Êı£¬·½±ãmainº¯ÊıÊ¹ÓÃ
+void KeywordStatistics();  //å…³é”®å­—ç»Ÿè®¡å‡½æ•°ï¼Œæ–¹ä¾¿mainå‡½æ•°ä½¿ç”¨
 
 /////////////////////////////////////realize///////////////////////////////////////////
 
-void InitKey()  //³õÊ¼»¯¹Ø¼ü×Ö±ê¼Ç 
+void InitKey()  //åˆå§‹åŒ–å…³é”®å­—æ ‡è®° 
 {
 	key["auto"] = key["double"] = key["int"] = key["struct"]
 		= key["break"] = key["else"] = key["long"] = key["switch"]
@@ -57,9 +61,9 @@ void InitKey()  //³õÊ¼»¯¹Ø¼ü×Ö±ê¼Ç
 
 void Input()
 {
-	cout << "ÇëÊäÈë¡°ÎÄ¼şÂ·¾¶¡±£º";
+	cout << "è¯·è¾“å…¥â€œæ–‡ä»¶è·¯å¾„â€ï¼š";
 	cin >> file_path;
-	cout << "ÇëÊäÈë¡°Êä³öµÈ¼¶¡±£º";
+	cout << "è¯·è¾“å…¥â€œè¾“å‡ºç­‰çº§â€ï¼š";
 	cin >> output_level;
 }
 
@@ -72,26 +76,58 @@ void OpenAndReadFileToWord()
 		return;
 	}
 	else {
-		//¶ÁÈ¡ÎÄ¼şÄÚÈİ£¨°´×Ö·û£©²¢ºÏ²¢³Éµ¥´Ê 
-		char c;  //string¿ÉÒÔÖ±½Ó+char 
+		cout << "æˆåŠŸæ‰“å¼€æ–‡ä»¶" << endl;
+		//è¯»å–æ–‡ä»¶å†…å®¹ï¼ˆæŒ‰å­—ç¬¦ï¼‰å¹¶åˆå¹¶æˆå•è¯ 
+		char c;  //stringå¯ä»¥ç›´æ¥+char 
 		string a_word = "";
-		bool last_is_alpha = false;  //ÉÏÒ»¸ö×Ö·ûÊÇ·ñÊÇ×ÖÄ¸ 
+		bool last_is_alpha = false;  //ä¸Šä¸€ä¸ªå­—ç¬¦æ˜¯å¦æ˜¯å­—æ¯ 
+		bool last_is_else = false;  //ä¸Šä¸€ä¸ªå•è¯æ˜¯å¦æ˜¯else
+
 		while ((c = fgetc(fp)) != EOF) {
 			if (isalpha(c)) {
 				a_word += c;
 				last_is_alpha = true;
 			}
 			else {
-				if (last_is_alpha) {  //Ò»¸öµ¥´Ê½áÊø 
-					if (key[a_word]) {  //¸Ãµ¥´ÊÊÇ¹Ø¼ü×Ö 
+				if (last_is_alpha) {  //ä¸€ä¸ªå•è¯ç»“æŸ 
+					if (key[a_word]) {  //è¯¥å•è¯æ˜¯å…³é”®å­— 
 						keyword_in_file.push_back(a_word);
+						if (a_word == "else") {
+							if_and_else_in_file.push_back("else");
+							if (c != ' ' && c != '\n') {
+								last_is_else = false;
+							}
+							else {
+								last_is_else = true;
+							}
+						}
+						if (a_word == "if") {
+							if (last_is_else) {
+								last_is_else = false;
+								if_and_else_in_file[if_and_else_in_file.size() - 1] += "_if";
+								else_if_cnt++;
+							}
+							else {
+								if_and_else_in_file.push_back("if");
+							}
+						}
 					}
 					a_word = "";
 				}
+				else {
+					if (c != ' ' && c != '\n') {
+						last_is_else = false;
+					}
+				}
 				last_is_alpha = false;
+				if (c == '{' || c == '}') {
+					string temp = "";
+					temp += c;
+					if_and_else_in_file.push_back(temp);
+				}
 			}
 		}
-		if (key[a_word]) {  //¸Ãµ¥´ÊÊÇ¹Ø¼ü×Ö 
+		if (key[a_word]) {  //è¯¥å•è¯æ˜¯å…³é”®å­— 
 			keyword_in_file.push_back(a_word);
 		}
 		fclose(fp);
@@ -105,7 +141,7 @@ void StatisticsLevel1()
 	}
 }
 
-void OutputLevel1()  //Êä³öµÈ¼¶1£ºÊä³ö¹Ø¼ü×ÖÍ³¼ÆĞÅÏ¢
+void OutputLevel1()  //è¾“å‡ºç­‰çº§1ï¼šè¾“å‡ºå…³é”®å­—ç»Ÿè®¡ä¿¡æ¯
 {
 	cout << "total num: " << total_cnt << endl;
 }
@@ -117,7 +153,7 @@ void StatisticsLevel2()
 	int case_num = 0;
 	for (int i = 0;i < keyword_in_file.size();i++) {
 		if (keyword_in_file[i] == "switch") {
-			if (have_switch) {  //³öÏÖ¹ıswitch£¬°ÑcaseÊıÁ¿´æÆğÀ´
+			if (have_switch) {  //å‡ºç°è¿‡switchï¼ŒæŠŠcaseæ•°é‡å­˜èµ·æ¥
 				case_cnt.push_back(case_num);
 				case_num = 0;
 			}
@@ -133,7 +169,7 @@ void StatisticsLevel2()
 	case_cnt.push_back(case_num);
 }
 
-void OutputLevel2()  //Êä³öµÈ¼¶2£ºÊä³öÓĞ¼¸×éswitch case½á¹¹£¬Í¬Ê±Êä³öÃ¿×é¶ÔÓ¦µÄcase¸öÊı
+void OutputLevel2()  //è¾“å‡ºç­‰çº§2ï¼šè¾“å‡ºæœ‰å‡ ç»„switch caseç»“æ„ï¼ŒåŒæ—¶è¾“å‡ºæ¯ç»„å¯¹åº”çš„caseä¸ªæ•°
 {
 	OutputLevel1();
 	cout << "switch num: " << switch_cnt << endl;
@@ -144,30 +180,59 @@ void OutputLevel2()  //Êä³öµÈ¼¶2£ºÊä³öÓĞ¼¸×éswitch case½á¹¹£¬Í¬Ê±Êä³öÃ¿×é¶ÔÓ¦µÄc
 	cout << endl;
 }
 
-void StatisticsLevel3()
+void StatisticsLevel3And4()
 {
-	StatisticsLevel1();
 	StatisticsLevel2();
+	stack <string> s;
+	stack <int> have_elseif;  //å¦‚æœå‡ºç°else ifåˆ™ç½®ä¸ºtrue,æ¯ä¸ªå¤§æ‹¬å·å¯¹åº”ä¸€ä¸ªæ ˆä½
+
+	for (int i = 0;i < if_and_else_in_file.size();i++) {
+		if (if_and_else_in_file[i] == "{") {
+			s.push("{");
+			have_elseif.push(0);
+		}
+		else if (if_and_else_in_file[i] == "}") {
+			while (s.top() != "{") {
+				s.pop();
+			}
+			s.pop();
+			have_elseif.pop();
+		}
+		else if (if_and_else_in_file[i] == "if") {
+			s.push("if");
+			have_elseif.pop();
+			have_elseif.push(0);
+		}
+		else if (if_and_else_in_file[i] == "else_if") {
+			have_elseif.pop();
+			have_elseif.push(1);
+		}
+		else if (if_and_else_in_file[i] == "else") {
+			if (have_elseif.top()) {
+				if_elseif_else_cnt++;
+			}
+			else {
+				if_else_cnt++;
+			}
+			have_elseif.pop();
+			have_elseif.push(0);
+			while (s.top() != "if") {
+				s.pop();
+			}
+			s.pop();
+		}
+	}
 }
 
-void OutputLevel3()  //Êä³öµÈ¼¶3£ºÊä³öÓĞ¼¸×éif else½á¹¹
+void OutputLevel3()  //è¾“å‡ºç­‰çº§3ï¼šè¾“å‡ºæœ‰å‡ ç»„if elseç»“æ„
 {
-	OutputLevel1();
 	OutputLevel2();
 	cout << "if-else num: " << if_else_cnt << endl;
 }
 
-void StatisticsLevel4()
-{
-	StatisticsLevel1();
-	StatisticsLevel2();
-	StatisticsLevel3();
-}
 
-void OutputLevel4()  //Êä³öµÈ¼¶4£ºÊä³öÓĞ¼¸×éif£¬else if£¬else½á¹¹
+void OutputLevel4()  //è¾“å‡ºç­‰çº§4ï¼šè¾“å‡ºæœ‰å‡ ç»„ifï¼Œelse ifï¼Œelseç»“æ„
 {
-	OutputLevel1();
-	OutputLevel2();
 	OutputLevel3();
 	cout << "if-elseif-else num: " << if_elseif_else_cnt << endl;
 }
@@ -186,11 +251,11 @@ void KeywordStatistics()
 		OutputLevel2();
 	}
 	else if (output_level == 3) {
-		StatisticsLevel3();
+		StatisticsLevel3And4();
 		OutputLevel3();
 	}
 	else {
-		StatisticsLevel4();
+		StatisticsLevel3And4();
 		OutputLevel4();
 	}
 }
