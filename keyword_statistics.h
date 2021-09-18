@@ -45,7 +45,7 @@ void OutputLevel4();
 
 void KeywordStatistics();  //关键字统计函数，方便 main 函数使用
 
-/////////////////////////////////////realize///////////////////////////////////////////
+//以下是函数实现
 
 void InitKey()  //初始化关键字标记 
 {
@@ -77,8 +77,8 @@ void OpenAndReadFileToWord()  //打开并按字符读取文件内容然后转化
 	}
 	else {
 		//读取文件内容（按字符）并合并成单词 
-		char c;  //string 可以直接+char 
-		string a_word = "";
+		char c;  
+		string a_word = "";  //合并成的单词
 		bool last_is_alpha = false;  //上一个字符是否是字母 
 		bool last_is_else = false;  //上一个单词是否是 else
 
