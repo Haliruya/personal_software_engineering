@@ -76,7 +76,6 @@ void OpenAndReadFileToWord()  //打开并按字符读取文件内容然后转化
 		return;
 	}
 	else {
-		cout << "成功打开文件" << endl;
 		//读取文件内容（按字符）并合并成单词 
 		char c;  //string 可以直接+char 
 		string a_word = "";
